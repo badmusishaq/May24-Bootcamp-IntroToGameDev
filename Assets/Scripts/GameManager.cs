@@ -6,21 +6,32 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private PlayerController player;
     [SerializeField] private ScoreManager scoreManager;
+    [SerializeField] UIManager uiManager;
 
     [SerializeField] private Pin[] pins;
 
+    public SoundManager soundManager;
 
+    [SerializeField] private Camera mainCam, closeupCam;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        StartGame();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void StartGame()
+    {
+        player.StartThrow();
+
+        mainCam.enabled = true;
+        closeupCam.enabled = false;
     }
 
     public void SetNextThrow()
@@ -30,19 +41,27 @@ public class GameManager : MonoBehaviour
 
     void NextThrow()
     {
+        int fallenPins = CalculateFallenPins();
+        scoreManager.SetFrameScore(fallenPins);
+
+
         if(scoreManager.currentFrame == 0)
         {
-            Debug.Log($"Game over, your total is {scoreManager.CalculateTotalScore()}");
+            uiManager.ShowGameOver(scoreManager.CalculateTotalScore());
+            return;
         }
-        else
-        {
-            Debug.Log($"Frame = {scoreManager.currentFrame} and Throw = {scoreManager.currentThrow}");
-            scoreManager.SetFrameScore(CalculateFallenPins());
-            Debug.Log($"Current score : {scoreManager.CalculateTotalScore()}");
-            Debug.Log($"Frame value - {scoreManager.currentFrame} , Throw value - {scoreManager.currentThrow}, current score - {scoreManager.CalculateTotalScore()} ");
 
-            player.StartThrow();
+        int frameTotal = 0;
+        for(int i = 0; i < scoreManager.currentFrame - 1; i++)
+        {
+            frameTotal += scoreManager.GetFrameScores()[i];
+            uiManager.SetFrameTotal(i, frameTotal);
         }
+
+        //SwitchCam();
+        SwitchCameras(false);
+        player.StartThrow();
+        
     }
 
     public void ResetAllPins()
@@ -69,5 +88,17 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Total fallen pins = {count}");
         //Debug.Log("Total fallen pins = " + count);
         return count;
+    }
+
+    public void SwitchCam()
+    {
+        mainCam.enabled = !mainCam.enabled;
+        closeupCam.enabled = !closeupCam.enabled;
+    }
+
+    public void SwitchCameras(bool isOn)
+    {
+        mainCam.enabled = !isOn;
+        closeupCam.enabled = isOn;
     }
 }

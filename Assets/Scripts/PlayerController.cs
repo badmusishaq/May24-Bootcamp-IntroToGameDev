@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform throwingArrow;
     [SerializeField] Animator arrowAnimator;
     [SerializeField] Transform ballSpawnPoint;
+    [SerializeField] SoundManager soundManager;
 
     public float throwForce;
     public float playerMoveSpeed;
@@ -17,13 +18,14 @@ public class PlayerController : MonoBehaviour
     //private Vector3 ballDefaultPosition;
     private Vector3 ballOffset;
     private Rigidbody selectedBall;
+    private float mobileHorizontalAxis;
 
     // Start is called before the first frame update
     void Start()
     {
         ballOffset = ballSpawnPoint.position - throwingArrow.position;
 
-        StartThrow();
+        //StartThrow();
     }
 
     // Update is called once per frame
@@ -48,7 +50,13 @@ public class PlayerController : MonoBehaviour
         {
             //throwingArrow.position += throwingArrow.right * Input.GetAxis("Horizontal") * playerMoveSpeed * Time.deltaTime;
 
+#if UNITY_STANDALONE || UNITY_EDITOR
             float movePosition = Input.GetAxis("Horizontal") * playerMoveSpeed * Time.deltaTime;
+
+#elif UNITY_ANDROID || UNITY_IOS
+            float movePosition = mobileHorizontalAxis * playerMoveSpeed * Time.deltaTime;
+#endif
+
             throwingArrow.position = new Vector3(Mathf.Clamp(throwingArrow.position.x + movePosition, arrowMinXValue, arrowMaxXValue),
                 throwingArrow.position.y, throwingArrow.position.z);
 
@@ -64,6 +72,34 @@ public class PlayerController : MonoBehaviour
             selectedBall.AddForce(throwingArrow.forward * throwForce, ForceMode.Impulse);
             wasBallThrown = true;
             arrowAnimator.SetBool("Aiming", false);
+            soundManager.PlaySound("throw");
+            soundManager.PlaySound("roll");
         }
+    }
+
+    public void ThrowBall()
+    {
+        wasBallThrown = true;
+        selectedBall.AddForce(throwingArrow.forward * throwForce, ForceMode.Impulse);
+        arrowAnimator.SetBool("Aiming", false);
+        soundManager.PlaySound("throw");
+        soundManager.PlaySound("roll");
+    }
+
+    public void SetMobileHorizontal(bool isLeft)
+    {
+        if(isLeft)
+        {
+            mobileHorizontalAxis = -1;
+        }
+        else
+        {
+            mobileHorizontalAxis = 1;
+        }
+    }
+
+    public void ResetMobileHorizontal()
+    {
+        mobileHorizontalAxis = 0;
     }
 }

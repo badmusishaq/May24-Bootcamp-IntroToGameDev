@@ -5,6 +5,7 @@ using UnityEngine;
 public class ScoreManager : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private UIManager uiManager;
 
     private int totalScore;
 
@@ -31,6 +32,7 @@ public class ScoreManager : MonoBehaviour
 
     public void SetFrameScore(int score)
     {
+        uiManager.SetFrameValue(currentFrame, currentThrow, score);
         //Ball 1
         if(currentThrow == 1)
         {
@@ -54,6 +56,8 @@ public class ScoreManager : MonoBehaviour
                 {
                     isStrike = true;
                     currentFrame++;
+                    uiManager.ShowStrike();
+                    gameManager.soundManager.PlaySound("strike");
                 }
 
                 //Reset pins
@@ -80,7 +84,7 @@ public class ScoreManager : MonoBehaviour
             }
             //.....................
 
-            if(frames[currentFrame - 1] == 10)
+            if(frames[currentFrame - 1] == 10) //total frame score after the second throw
             {
                 if(currentFrame == 10)
                 {
@@ -92,6 +96,9 @@ public class ScoreManager : MonoBehaviour
                     currentFrame++;
                     currentThrow = 1;
                 }
+
+                gameManager.soundManager.PlaySound("spare");
+                uiManager.ShowSpare();
             }
             else
             {
@@ -124,6 +131,11 @@ public class ScoreManager : MonoBehaviour
 
             return;
         }
+    }
+
+    public int[] GetFrameScores()
+    {
+        return frames;
     }
 
     public int CalculateTotalScore()

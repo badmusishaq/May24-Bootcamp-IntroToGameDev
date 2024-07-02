@@ -6,6 +6,7 @@ TagManager:
   tags:
   - pin
   - pit
+  - closeup
   layers:
   - Default
   - TransparentFX

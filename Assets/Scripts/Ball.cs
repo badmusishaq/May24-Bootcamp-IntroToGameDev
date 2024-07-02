@@ -6,6 +6,8 @@ public class Ball : MonoBehaviour
 {
     GameManager manager;
 
+    bool hasCollided = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,21 +25,30 @@ public class Ball : MonoBehaviour
         //Check collison on all colliders in contact
         //Debug.Log("Ball collided with " + collision.gameObject.name);
 
-        if(collision.gameObject.CompareTag("pin"))
+        if(collision.gameObject.CompareTag("pin") && !hasCollided)
         {
-            //Check for collision object with the "pin" tag only
-            //Debug.Log("Collided with a pin");
+            hasCollided = true;
+            manager.soundManager.PlaySound("collide");
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        //Debug.Log("Collided with a trigger");
+        if(other.CompareTag("pit"))
+        {
+            //Debug.Log("Collided with a trigger");
 
-        //Start the next throw when the ball enters the pit
-        manager.SetNextThrow();
+            //Start the next throw when the ball enters the pit
+            manager.SetNextThrow();
 
-        //Destroy or delete the ball that just entered the pit
-        Destroy(gameObject);
+            //Destroy or delete the ball that just entered the pit
+            Destroy(gameObject);
+        }
+        else if(other.CompareTag("closeup"))
+        {
+            //manager.SwitchCam();
+            manager.SwitchCameras(true);
+        }    
+        
     }
 }
